@@ -5,7 +5,13 @@
 #include <limits.h>   // INT_MIN, INT_MAX
 #include <math.h>     // powl, INFINITY
 #include <stdbool.h>  // bool, true, false
-
+#ifdef USE_STRTOLL_FOR_PREFIX
+#ifdef USE_DEFAULT_STRTOLL
+#include <stdlib.h>  // strtoll
+#else
+#include "../strtoll/strtoll.c"  // c8_strToLL // change to path of c8_strtoll
+#endif
+#endif
 static double c8_strToD(char *str, char **v) {
     long long num = 0;
     int digits = 0;
@@ -18,6 +24,22 @@ static double c8_strToD(char *str, char **v) {
         ++str;
     } else if (c == '+')
         ++str;
+#ifdef USE_STRTOLL_FOR_PREFIX
+    if (*str == '0') {
+        switch (*(str + 1)) {
+            case 'x':
+            case 'o':
+            case 'b':
+#ifdef USE_DEFAULT_STRTOLL
+                num = strtoll(str, &str, 0);
+#else
+                num = c8_strToLL(start, &str, 0);
+#endif
+                if (v) *v = str;
+                return (double)num * (double)(neg ? -1 : 1);
+        }
+    }
+#endif
     for (;;) {
         c = *str++;
         if (c >= '0' && c <= '9') {

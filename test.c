@@ -3,9 +3,9 @@
  */
 #include <stdio.h>   // printf
 #include <stdlib.h>  // strtod
-
+#define USE_STRTOLL_FOR_PREFIX
 #include "strtod.c"  // c8_strtod
-#define testCount 32
+#define testCount 45
 char *values[testCount] = {
     /* 0*/
     "17976931348623158000000000000000000000000000000000000000000000000000000000"
@@ -78,6 +78,19 @@ char *values[testCount] = {
     /*29*/ "-27e+",
     /*30*/ "1_000_000",
     /*31*/ "1.000_000_1",
+    /*32*/ "0xABCDEFG",
+    /*33*/ "0xABCDEF",
+    /*34*/ "-0xABCDEF",
+    /*35*/ "0x",
+    /*36*/ "-0x",
+    /*37*/ "0b10101",
+    /*38*/ "0b012",
+    /*39*/ "0b",
+    /*40*/ "-0b",
+    /*41*/ "0o1234567",
+    /*42*/ "0o12345678",
+    /*43*/ "0o",
+    /*44*/ "-0o",
 };
 
 #include <string.h>  // strcmp
@@ -94,7 +107,8 @@ void consistencyCheck() {
         err2 = errno;
         if (d1 != d2 || strcmp(str1, str2) || err1 != err2) {
             printf(
-                "%2d: %.20e (remaining: \"%s\", errcode: %d)\t%.20e (remaining: \"%s\", errcode: %d)\n",
+                "%2d: %.20e (remaining: \"%s\", errcode: %d)\t%.20e "
+                "(remaining: \"%s\", errcode: %d)\n",
                 i, d1, str1, err1, d2, str2, err2);
             success = false;
         }
@@ -110,7 +124,7 @@ void consistencyCheck() {
 #if defined(WIN32) || defined(__WIN32) || defined(_WIN32) || \
     defined(__WIN32__) || defined(_WIN32_)
 
-#include <windows.h> // QueryPerformanceCounter, QueryPerformanceFrequency
+#include <windows.h>  // QueryPerformanceCounter, QueryPerformanceFrequency
 
 double get_current_time() {
     LARGE_INTEGER t, f;
@@ -121,8 +135,8 @@ double get_current_time() {
 
 #else
 
-#include <sys/resource.h> // timeval
-#include <sys/time.h> // gettimeofday
+#include <sys/resource.h>  // timeval
+#include <sys/time.h>      // gettimeofday
 
 double get_current_time() {
     struct timeval t;
@@ -161,7 +175,7 @@ void benchmark() {
         "new strtod:      %d\n"
         "Printing results of functions:\n",
         ogStrToD, newStrToD);
-    for (int i = 0; i < 22; ++i) {
+    for (int i = 0; i < testCount; ++i) {
         printf("%2d: %.20e\t%.20e\n", i, returns1[i], returns2[i]);
     }
 }

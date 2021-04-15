@@ -12,6 +12,9 @@
 #include "../strtoll/strtoll.c"  // c8_strToLL // change to path of c8_strtoll
 #endif
 #endif
+#ifdef ERRNO_AT_DBL_MIN_AND_MAX
+#include <float.h> // DBL_MAX, DBL_MIN
+#endif
 static double c8_strToD(char *str, char **v) {
     long long num = 0;
     int digits = 0;
@@ -131,7 +134,12 @@ skip:
     }
     // use long doubles to preserve accuracy
     double ret = (double)((long double)(num)*powl(10, e));
+#ifdef ERRNO_AT_DBL_MIN_AND_MAX
+    if(ret > DBL_MAX) errno = ERANGE;
+    else if (ret < DBL_MIN && num != 0) errno = ERANGE;
+#else
     if (ret == INFINITY) errno = ERANGE;
-    if (ret == 0 && num != 0) errno = ERANGE;
+    else if (ret == 0 && num != 0) errno = ERANGE;
+#endif
     return ret * (neg ? -1 : 1);
 }

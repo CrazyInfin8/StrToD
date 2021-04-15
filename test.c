@@ -4,6 +4,7 @@
 #include <stdio.h>   // printf
 #include <stdlib.h>  // strtod
 #define USE_STRTOLL_FOR_PREFIX
+#define ERRNO_AT_DBL_MIN_AND_MAX
 #include "strtod.c"  // c8_strtod
 #define testCount 45
 char *values[testCount] = {
